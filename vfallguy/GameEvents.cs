@@ -6,7 +6,7 @@ using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
 
-namespace vfallguy;
+namespace vfallgay;
 
 [StructLayout(LayoutKind.Sequential, Pack = 1)]
 public unsafe struct ActionEffectHeader

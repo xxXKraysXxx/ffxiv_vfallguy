@@ -1,13 +1,15 @@
 ﻿using Dalamud.Game.ClientState.Conditions;
+using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using ImGuiNET;
 using System;
 using System.Linq;
 using System.Numerics;
 
-namespace vfallguy;
+namespace vfallgay;
 
 public class MainWindow : Window, IDisposable
 {
@@ -21,14 +23,17 @@ public class MainWindow : Window, IDisposable
     private float _movementSpeed;
     private bool _autoJoin;
     private bool _autoLeaveIfNotSolo;
+    private bool _autoLeaveIfSpectator;
     private bool _showAOEs;
     private bool _showAOEText;
     private bool _showPathfind;
     private DateTime _autoJoinAt = DateTime.MaxValue;
     private DateTime _autoLeaveAt = DateTime.MaxValue;
+    private DateTime _autoLeaveSpecAt = DateTime.MaxValue;
     private int _numPlayersInDuty;
     private float _autoJoinDelay = 0.5f;
     private float _autoLeaveDelay = 3;
+    private float _autoLeaveSpecDelay = 1;
     private int _autoLeaveLimit = 1;
 
     public MainWindow() : base("vfailguy")
@@ -68,34 +73,49 @@ public class MainWindow : Window, IDisposable
 
     public unsafe override void Draw()
     {
-        if (ImGui.Button("Queue"))
+        if (ImGui.Button("Вход"))
             _automation.RegisterForDuty();
         ImGui.SameLine();
-        if (ImGui.Button("Leave"))
+        if (ImGui.Button("Выход"))
             _automation.LeaveDuty();
         ImGui.SameLine();
-        ImGui.TextUnformatted($"Num players in duty: {_numPlayersInDuty} (autoleave: {(_autoLeaveAt == DateTime.MaxValue ? "never" : $"in {(_autoLeaveAt - _now).TotalSeconds:f1}s")})");
+        //if (ImGui.Button("тест"))
+        //    TestSpec();
+        ImGui.SameLine();
+        ImGui.TextUnformatted($"Кол-во человек: {_numPlayersInDuty}");
+        if (_autoLeaveIfNotSolo)
+            ImGui.TextUnformatted($"(автовыход от людей: {(_autoLeaveAt == DateTime.MaxValue ? "никогда" : $"через {(_autoLeaveAt - _now).TotalSeconds:f1}s")})");
+        if (_autoLeaveIfSpectator)
+            ImGui.TextUnformatted($"(автовыход от наблюдения: {(_autoLeaveSpecAt == DateTime.MaxValue ? "никогда" : $"через {(_autoLeaveSpecAt - _now).TotalSeconds:f1}s")})");
 
-        ImGui.Checkbox("Auto register", ref  _autoJoin);
+        ImGui.Checkbox("Авто регистрация", ref  _autoJoin);
         if (_autoJoin)
         {
             using (ImRaii.PushIndent())
             {
-                ImGui.SliderFloat("Delay###j", ref _autoJoinDelay, 0, 10);
+                ImGui.SliderFloat("Задержка###j", ref _autoJoinDelay, 0, 10);
             }
         }
-        ImGui.Checkbox("Auto leave if not solo", ref _autoLeaveIfNotSolo);
+        ImGui.Checkbox("Автовыход если людей в лобби больше чем...", ref _autoLeaveIfNotSolo);
         if (_autoLeaveIfNotSolo)
         {
             using (ImRaii.PushIndent())
             {
-                ImGui.SliderFloat("Delay###l", ref _autoLeaveDelay, 0, 10);
-                ImGui.SliderInt("Limit", ref _autoLeaveLimit, 1, 23);
+                ImGui.SliderFloat("Задержка###l", ref _autoLeaveDelay, 0, 10);
+                ImGui.SliderInt("Кол-во человек", ref _autoLeaveLimit, 1, 23);
             }
         }
-        ImGui.Checkbox("Show AOE zones", ref _showAOEs);
-        ImGui.Checkbox("Show AOE debug text", ref _showAOEText);
-        ImGui.Checkbox("Show proposed path", ref _showPathfind);
+        ImGui.Checkbox("Автовыход при наблюдении (при поражении ИЛИ победе)", ref _autoLeaveIfSpectator);
+        if (_autoLeaveIfSpectator)
+        {
+            using (ImRaii.PushIndent())
+            {
+                ImGui.SliderFloat("Задержка###l", ref _autoLeaveSpecDelay, 0, 10);
+            }
+        }
+        ImGui.Checkbox("Показать АОЕ Зоны 3го этапа", ref _showAOEs);
+        ImGui.Checkbox("Показать дебаг текст аое 3го этапа", ref _showAOEText);
+        ImGui.Checkbox("Показать предполагаемый оптимальный путь для 3го этапа", ref _showPathfind);
 
         if (_map != null)
         {
@@ -169,9 +189,53 @@ public class MainWindow : Window, IDisposable
             _autoJoinAt = DateTime.MaxValue;
         }
     }
+    private unsafe bool IsSpectating(IBattleChara? player)
+    {
 
+        if (player == null)
+            return false;
+        var battleChar = (BattleChara*)player.Address;
+        var statuses = battleChar->GetStatusManager()->Status;
+        foreach (ref var status in statuses)
+        {
+
+            if (status.StatusId == 3708)
+                return true;
+        }
+
+        return false;
+    }
+
+    unsafe private void TestSpec()
+    {
+        var player = Service.ClientState.LocalPlayer;
+        bool spec = IsSpectating(player);
+        if (spec)
+        {
+            Service.Log.Debug($"Spectating");
+        }
+        else
+        {
+            Service.Log.Debug($"Not spectating");
+        }
+        if (player == null)
+        { 
+            Service.Log.Debug($"player = null");
+            return; 
+        }
+        var battleChar = (BattleChara*)player.Address;
+        var statuses = battleChar->GetStatusManager()->Status;
+        foreach (ref var status in statuses)
+        {
+            Service.Log.Debug($"statuses  =  {status.StatusId}");
+
+        }
+
+    }
     private void UpdateAutoLeave()
     {
+
+        
         _numPlayersInDuty = Service.ClientState.TerritoryType == 1165 && Service.Condition[ConditionFlag.BoundByDuty] && !Service.Condition[ConditionFlag.BetweenAreas]
             ? Service.ObjectTable.Count(o => o.ObjectKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Player)
             : 0;
@@ -190,6 +254,19 @@ public class MainWindow : Window, IDisposable
             Service.Log.Debug($"Auto-leaving: {_numPlayersInDuty} players");
             _automation.LeaveDuty();
             _autoLeaveAt = DateTime.MaxValue;
+        }
+
+        if (_autoLeaveIfSpectator && IsSpectating(Service.ClientState.LocalPlayer) && _autoLeaveSpecAt == DateTime.MaxValue)
+        {
+            _autoLeaveSpecAt = _now.AddSeconds(_autoLeaveSpecDelay);
+            Service.Log.Debug($"Auto-leaving: in {_autoLeaveSpecAt:f2}s...");
+
+        } else
+        if (_now >= _autoLeaveSpecAt)
+        {
+
+            _automation.LeaveDuty();
+            _autoLeaveSpecAt = DateTime.MaxValue;
         }
     }
 

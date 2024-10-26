@@ -5,7 +5,7 @@ using System.Linq;
 using System.Numerics;
 using System.Runtime.InteropServices;
 
-namespace vfallguy;
+namespace vfallgay;
 
 public static class Geom
 {

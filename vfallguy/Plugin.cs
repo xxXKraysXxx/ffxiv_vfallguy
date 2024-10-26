@@ -1,13 +1,13 @@
 ﻿using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
 
-namespace vfallguy;
+namespace vfallgay;
 
 public sealed class Plugin : IDalamudPlugin
 {
     public IDalamudPluginInterface Dalamud { get; init; }
 
-    public WindowSystem WindowSystem = new("vfallguy");
+    public WindowSystem WindowSystem = new("vfallgay");
     private MainWindow _wnd;
 
     public Plugin(IDalamudPluginInterface dalamud)

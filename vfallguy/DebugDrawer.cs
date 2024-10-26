@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 
-namespace vfallguy;
+namespace vfallgay;
 
 public unsafe class DebugDrawer
 {

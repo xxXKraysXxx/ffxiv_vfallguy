@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Numerics;
 
-namespace vfallguy;
+namespace vfallgay;
 
 public class MapTest : Map
 {

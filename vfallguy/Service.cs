@@ -3,7 +3,7 @@ using Dalamud.Game.ClientState.Objects;
 using Dalamud.IoC;
 using Dalamud.Plugin.Services;
 
-namespace vfallguy;
+namespace vfallgay;
 
 public class Service
 {

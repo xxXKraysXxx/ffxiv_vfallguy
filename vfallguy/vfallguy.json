@@ -1,9 +1,9 @@
 {
-  "Author": "veyn",
+  "Author": "veyn and krays",
   "Name": "vfallguy",
-  "Punchline": "Get that achievement!",
-  "Description": "Auto join/leave to try fishing for solo instance, highlight of aoes on last stage.",
-  "InternalName": "vfallguy",
+  "Punchline": "Помогите я руссифицировал бобы!",
+  "Description": "Авто вход/выход при поражении, поиск лобби с малым кол-вом людей, подсветка зон на последнем этапе.",
+  "InternalName": "vfallgay",
   "ApplicableVersion": "any",
   "IconUrl": "https://raw.githubusercontent.com/awgil/ffxiv_vfallguy/3af43e6f7b7e63c6527ffa4ecc54190034bd60c4/icon2.png"
 }

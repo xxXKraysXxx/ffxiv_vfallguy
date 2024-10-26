@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Numerics;
 
-namespace vfallguy;
+namespace vfallgay;
 
 // voxelized 3d 'spacetime'
 public class PathfindMap

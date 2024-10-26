@@ -4,7 +4,7 @@ using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
 
-namespace vfallguy;
+namespace vfallgay;
 
 public class Map : IDisposable
 {
